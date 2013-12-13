@@ -696,7 +696,7 @@ bool WhoParser::AddPhotoToDrawer(const char * inStr, int & inOutPos, std::ostrea
     
 bool WhoParser::ShowDrawer(const char * inStr, int & inOutPos, std::ostream & inErrorStream)
 {
-    int pos = inOutPos;
+    int pos = inOutPos; 
     
    if( Word(inStr, inOutPos) == "showDrawer" )
    {
