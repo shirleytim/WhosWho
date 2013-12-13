@@ -11,6 +11,7 @@
 #include "glm/glm.hpp"
 #include "utilities.h"
 
+extern void *StringToNSString(std::string aString);
 namespace who
 {
 

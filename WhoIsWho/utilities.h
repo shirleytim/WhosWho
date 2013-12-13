@@ -167,9 +167,7 @@ namespace glm {
 
 std::string ReadWord(std::string & line, int & pos);
 std::string ReadQuotedString(std::string & line, int & pos, bool * outIsEmptyString = 0);
-void *StringToNSString(std::string aString);
 
-void *StringToNSString(std::string aString);
 void PopulateControlsForRing();
 #endif
 

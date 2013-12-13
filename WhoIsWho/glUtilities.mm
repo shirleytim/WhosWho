@@ -21,14 +21,12 @@ std::string NSStringToString(NSString *thisNSString)
 	return thisString; 
 	
 }
-void *StringToNSString(std::string aString)
+NSString *StringToNSString(std::string aString)
 {
     
     NSString *aNSString = [NSString stringWithUTF8String: aString.c_str()];
-    return (__bridge void *)aNSString;
+    return aNSString;
 }
-
-
 /**************************************************************************************************/
 
 

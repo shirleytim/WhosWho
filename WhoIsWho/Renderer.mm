@@ -159,7 +159,88 @@ int GLData::DeInit()
 
 void sDrawDrawer(float inDropdownAnim)
 {
+    gGame.currentDrawer = "ToolsDrawer";
+    // draw face list
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
+    glUseProgram(gGLData.colorProgram.program);
+    glBindVertexArrayOES(gGLData.squareVAO);
+    glUniform4f(gGLData.colorProgram.colorLoc, 0, 0, 1, 1);
+    glUniform1f(gGLData.colorProgram.imageWeight, 0);
+    glUniform1i(gGLData.colorProgram.imageTexture, 0);
+    glActiveTexture(GL_TEXTURE0);
+    
+    float height = 0.07f;  // world units of drawer backdrop
+    float width = 0.1f;
+    
+    int currentRingZ = gGame.rings.rings[gGame.rings.currentRing].stackingOrder;
+    
+    glm::vec3 corners[4];
+    ComputeTopPhotoCorners(gGame.rings.rings[gGame.rings.currentRing], corners);
+    float top = (who::kR1+who::kR0)*0.5f + corners[0].y;
+    width = corners[0].x - corners[1].x;
+    float dy = height * glm::abs(glm::sin(inDropdownAnim));
+    glm::mat4 mat = glm::scale(glm::translate(gGame.camera.vpMat, glm::vec3(0, top+dy*0.5f, -currentRingZ+who::kDepthOffset)),
+                               glm::vec3(width, dy, 1));
+    glUniform4f(gGLData.colorProgram.colorLoc, 0.8f, 0.8f, 0.8f, 0.5f);
+    glUniformMatrix4fv(gGLData.colorProgram.mvpMatLoc, 1, GL_FALSE, &mat[0][0]);
+    
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    
+    float backgroundHeight = dy;
+    
+    height /= 2;
+    width  /= 2;
+    
+    int numItems = int(gGame.drawers[gGame.currentDrawer].photos.size());
+    
+    int xSpacing = 0;
+    float centerX = -width*0.5f + height*0.5f;
+    float xInc = height + xSpacing;
+    
+    
+    centerX += xSpacing;
+    if( width / height >= numItems )
+    {
+        // Simple layout of faces
+        xInc = width / numItems;
+        centerX = -width*0.5f + xInc - 0.5*xInc;
+    }
+    else
+    {
+        // Shrink face images down to fit them all
+        xInc = width / numItems;
+        centerX = -width*0.5f + xInc - 0.5*xInc;
+        
+        height = xInc;
+        dy = height * glm::abs(glm::sin(inDropdownAnim));
+    }
+    
+    top += (backgroundHeight/2 - dy/2);
+    for_i( numItems ) {
+        mat = glm::scale(glm::translate(gGame.camera.vpMat, glm::vec3(centerX, top+dy*0.5f, -currentRingZ+who::kDepthOffset)),
+                         glm::vec3(height, dy, 1));
+        glUniform4f(gGLData.colorProgram.colorLoc, 0.8f, 0.8f, 0.8f, 1);
+        glUniformMatrix4fv(gGLData.colorProgram.mvpMatLoc, 1, GL_FALSE, &mat[0][0]);
+        glBindTexture(GL_TEXTURE_2D, gGame.images[gGame.drawers[gGame.currentDrawer].photos[i]].texID);
+        glUniform1f(gGLData.colorProgram.imageWeight, 1);
+        
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        
+        centerX += xInc;
+    }
+    
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    
+}
+
+
+void sDrawDrawer2(float inDropdownAnim)
+{
+    gGame.currentDrawer = "FacesDrawer";
     // draw face list
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -182,7 +263,7 @@ void sDrawDrawer(float inDropdownAnim)
     float top = (who::kR1+who::kR0)*0.5f + corners[2].y;
     width = corners[0].x - corners[1].x;
     float dy = height * glm::abs(glm::sin(inDropdownAnim));
-    glm::mat4 mat = glm::scale(glm::translate(gGame.camera.vpMat, glm::vec3(0, top-dy*0.5f, -currentRingZ+who::kDepthOffset)),
+    glm::mat4 mat = glm::scale(glm::translate(gGame.camera.vpMat, glm::vec3(0, top-dy*0.5f, -currentRingZ+0.001f)),
                                glm::vec3(width, dy, 1));
     glUniform4f(gGLData.colorProgram.colorLoc, 0.8f, 0.8f, 0.8f, 0.5f);
     glUniformMatrix4fv(gGLData.colorProgram.mvpMatLoc, 1, GL_FALSE, &mat[0][0]);
@@ -215,21 +296,13 @@ void sDrawDrawer(float inDropdownAnim)
         dy = height * glm::abs(glm::sin(inDropdownAnim));
     }
     
-    top += (-backgroundHeight/2 + dy/2);
+    top -= (backgroundHeight/2 - dy/2);
     for_i( numItems ) {
-        std::string photoName = gGame.drawers[gGame.currentDrawer].photos[i];
-        who::Photo & photo = gGame.photos[photoName];
-        ImageInfo & image = gGame.images[photoName];
-        
-        mat = glm::scale(glm::translate(glm::mat4(1), glm::vec3(centerX, top-dy*0.5f, -currentRingZ+who::kDepthOffset)),
+        mat = glm::scale(glm::translate(gGame.camera.vpMat, glm::vec3(centerX, top-dy*0.5f, -currentRingZ+who::kDepthOffset)),
                          glm::vec3(height, dy, 1));
-        photo.transform = glm::mat4x3(mat);
-        
-        mat = gGame.camera.vpMat * mat;
-        
         glUniform4f(gGLData.colorProgram.colorLoc, 0.8f, 0.8f, 0.8f, 1);
         glUniformMatrix4fv(gGLData.colorProgram.mvpMatLoc, 1, GL_FALSE, &mat[0][0]);
-        glBindTexture(GL_TEXTURE_2D, image.texID);
+        glBindTexture(GL_TEXTURE_2D, gGame.images[gGame.drawers[gGame.currentDrawer].photos[i]].texID);
         glUniform1f(gGLData.colorProgram.imageWeight, 1);
         
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -241,8 +314,6 @@ void sDrawDrawer(float inDropdownAnim)
     glDisable(GL_BLEND);
     
 }
-
-
 int GLData::RenderScene()
 {
     int errorCode = 0;
@@ -273,8 +344,10 @@ int GLData::RenderScene()
         
         DrawRing(ring, gGame.camera.zoomed==1, mvMat);
 
-        if( gGame.currentDrawer != "" && gGame.drawerDropAnim>0 )
+        if( gGame.currentDrawer != "" && gGame.drawerDropAnim>0 ) {
+            sDrawDrawer2(gGame.drawerDropAnim);
             sDrawDrawer(gGame.drawerDropAnim);
+        }
         
     }
     
@@ -819,7 +892,7 @@ void DrawRing(who::Ring & inRing, bool inZoomedIn, const glm::mat4 & inMVPMat) {
         // build the matrix that transforms normalzied image corners to world space
         glm::mat4 mat = glm::mat4(glm::scale(glm::translate(glm::rotate(glm::mat4(1), -glm::degrees(angle), glm::vec3(0, 0, 1)),
                                                             glm::vec3(0, radius, who::kDepthOffset)),
-                                   glm::vec3(w, h, 1)));
+                                             glm::vec3(w, h, 1)));
         
         
         
@@ -846,9 +919,7 @@ void DrawRing(who::Ring & inRing, bool inZoomedIn, const glm::mat4 & inMVPMat) {
         
         glUniform1fv(gGLData.photoProgram.maskWeightLoc, 2, maskWeights);
         
-        
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-        
         if( i == (inRing.selectedPhoto%inRing.photos.size()) )
             // the selected photo has a red box around it
         {
