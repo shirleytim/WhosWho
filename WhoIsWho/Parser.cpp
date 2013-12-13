@@ -708,8 +708,10 @@ bool WhoParser::ShowDrawer(const char * inStr, int & inOutPos, std::ostream & in
        if( drawerIt != keyValues.end() && locationIt != keyValues.end() )
        {
            if( locationIt->second == "bottom" )
-               gGame.currentDrawer = drawerIt->second;
-            
+               gGame.bottomDrawer = drawerIt->second;
+           else if( locationIt->second == "top" )
+               gGame.topDrawer = drawerIt->second;
+           
            if( gGame.drawerDropAnim < 1.0 )
                AnimationSystem::CreateFloatAnimation(1e-7f, 1.0f, 2, InterpolationTypeSmooth, &gGame.drawerDropAnim);
 

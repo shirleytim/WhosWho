@@ -332,8 +332,8 @@ void PopulateControlsForRing()
         DisplaySaveAndUploadButtons();
     }
     if (hitRing->name =="gameNamesRing") {
-        gGame.Execute("newDrawer name=loadAndDelete populate=PopulateLoadAndDeleteDrawer", 1, "PopulateLoadAndDeleteDrawer", PopulateLoadAndDeleteDrawer);
-        //DisplayLoadAndDeleteButtons();
+       // gGame.Execute("newDrawer name=loadAndDelete populate=PopulateLoadAndDeleteDrawer", 1, "PopulateLoadAndDeleteDrawer", PopulateLoadAndDeleteDrawer);
+        DisplayLoadAndDeleteButtons();
     }
 }
 static void displayAllLocalGameNames()
@@ -1013,8 +1013,11 @@ void PopulateEditorDrawer(who::Drawer & inOutDrawer, void * /*inArgs*/)
         
         hitPhoto = hitTestPhotos(hitRing->photos);
         
-        if( gGame.currentDrawer != "" )
-            hitDrawerItem = hitTestPhotos(gGame.drawers[gGame.currentDrawer].photos);
+        if( gGame.bottomDrawer != "" )
+            hitDrawerItem = hitTestPhotos(gGame.drawers[gGame.bottomDrawer].photos);
+        
+        if( gGame.topDrawer != "" )
+            hitDrawerItem = hitTestPhotos(gGame.drawers[gGame.topDrawer].photos);
     }
     
     // for hit cancel
@@ -1136,7 +1139,8 @@ void PopulateEditorDrawer(who::Drawer & inOutDrawer, void * /*inArgs*/)
             {
                 sprintf(command, "zoomToPhoto photo=%s", hitPhoto->filename.c_str());
                 gGame.Execute(command);
-                gGame.Execute("showDrawer drawer=FacesDrawer");
+                gGame.Execute("showDrawer drawer=FacesDrawer location=bottom");
+                gGame.Execute("showDrawer drawer=ToolsDrawer location=top");
                 
             }
         }

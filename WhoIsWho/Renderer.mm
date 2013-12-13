@@ -157,9 +157,13 @@ int GLData::DeInit()
 }
 
 
-void sDrawDrawer(float inDropdownAnim)
+void DrawTopDrawer(float inDropdownAnim)
 {
-    gGame.currentDrawer = "ToolsDrawer";
+    if( gGame.topDrawer == "" )
+        return;
+    
+    
+    //gGame.currentDrawer = "ToolsDrawer";
     // draw face list
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -194,7 +198,7 @@ void sDrawDrawer(float inDropdownAnim)
     height /= 2;
     width  /= 2;
     
-    int numItems = int(gGame.drawers[gGame.currentDrawer].photos.size());
+    int numItems = int(gGame.drawers[gGame.topDrawer].photos.size());
     
     int xSpacing = 0;
     float centerX = -width*0.5f + height*0.5f;
@@ -220,11 +224,15 @@ void sDrawDrawer(float inDropdownAnim)
     
     top += (backgroundHeight/2 - dy/2);
     for_i( numItems ) {
+        gGame.photos[gGame.drawers[gGame.topDrawer].photos[i]].transform =
+            glm::mat4x3( glm::scale(glm::translate(glm::mat4(1), glm::vec3(centerX, top+dy*0.5f, who::kDepthOffset)),
+                         glm::vec3(height, dy, 1)));
+        
         mat = glm::scale(glm::translate(gGame.camera.vpMat, glm::vec3(centerX, top+dy*0.5f, -currentRingZ+who::kDepthOffset)),
                          glm::vec3(height, dy, 1));
         glUniform4f(gGLData.colorProgram.colorLoc, 0.8f, 0.8f, 0.8f, 1);
         glUniformMatrix4fv(gGLData.colorProgram.mvpMatLoc, 1, GL_FALSE, &mat[0][0]);
-        glBindTexture(GL_TEXTURE_2D, gGame.images[gGame.drawers[gGame.currentDrawer].photos[i]].texID);
+        glBindTexture(GL_TEXTURE_2D, gGame.images[gGame.drawers[gGame.topDrawer].photos[i]].texID);
         glUniform1f(gGLData.colorProgram.imageWeight, 1);
         
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -238,9 +246,12 @@ void sDrawDrawer(float inDropdownAnim)
 }
 
 
-void sDrawDrawer2(float inDropdownAnim)
+void DrawBottomDrawer(float inDropdownAnim)
 {
-    gGame.currentDrawer = "FacesDrawer";
+    if( gGame.bottomDrawer == "" )
+        return;
+    
+    //gGame.currentDrawer = "FacesDrawer";
     // draw face list
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -272,7 +283,7 @@ void sDrawDrawer2(float inDropdownAnim)
     
     float backgroundHeight = dy;
     
-    int numItems = int(gGame.drawers[gGame.currentDrawer].photos.size());
+    int numItems = int(gGame.drawers[gGame.bottomDrawer].photos.size());
     
     int xSpacing = 0;
     float centerX = -width*0.5f + height*0.5f;
@@ -298,11 +309,15 @@ void sDrawDrawer2(float inDropdownAnim)
     
     top -= (backgroundHeight/2 - dy/2);
     for_i( numItems ) {
+        gGame.photos[gGame.drawers[gGame.bottomDrawer].photos[i]].transform =
+            glm::mat4x3( glm::scale(glm::translate(glm::mat4(1), glm::vec3(centerX, top-dy*0.5f, who::kDepthOffset)), glm::vec3(height, dy, 1)));
+        
         mat = glm::scale(glm::translate(gGame.camera.vpMat, glm::vec3(centerX, top-dy*0.5f, -currentRingZ+who::kDepthOffset)),
                          glm::vec3(height, dy, 1));
+        
         glUniform4f(gGLData.colorProgram.colorLoc, 0.8f, 0.8f, 0.8f, 1);
         glUniformMatrix4fv(gGLData.colorProgram.mvpMatLoc, 1, GL_FALSE, &mat[0][0]);
-        glBindTexture(GL_TEXTURE_2D, gGame.images[gGame.drawers[gGame.currentDrawer].photos[i]].texID);
+        glBindTexture(GL_TEXTURE_2D, gGame.images[gGame.drawers[gGame.bottomDrawer].photos[i]].texID);
         glUniform1f(gGLData.colorProgram.imageWeight, 1);
         
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -344,13 +359,13 @@ int GLData::RenderScene()
         
         DrawRing(ring, gGame.camera.zoomed==1, mvMat);
 
-        if( gGame.currentDrawer != "" && gGame.drawerDropAnim>0 ) {
-            sDrawDrawer2(gGame.drawerDropAnim);
-            sDrawDrawer(gGame.drawerDropAnim);
+        if( gGame.drawerDropAnim>0 ) {
+            DrawTopDrawer(gGame.drawerDropAnim);
+            DrawBottomDrawer(gGame.drawerDropAnim);
         }
         
     }
-    
+    /*
     for( std::string & str : gGame.animations )
     {
         ImageInfo imageInfo;
@@ -371,6 +386,7 @@ int GLData::RenderScene()
         
         glDeleteTextures(1, &imageInfo.texID);
     }
+     */
     glBindTexture(GL_TEXTURE_2D, 0);
     
     return errorCode;

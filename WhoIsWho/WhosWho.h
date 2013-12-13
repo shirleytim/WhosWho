@@ -163,7 +163,8 @@ namespace who
             zoomedToPhoto = false;
             currentAnmID = 0;
             
-            currentDrawer = "";
+            bottomDrawer = "";
+            topDrawer = "";
             drawerDropAnim = 0;
             totalPhotosToDownload=-1;
             currentNumOfPhotos = 0; 
@@ -191,7 +192,8 @@ namespace who
         std::map<std::string, void *> animationVars;  // animation variables - animation strings can reference these vars
         
         std::map<std::string, Drawer> drawers;
-        std::string currentDrawer;  // == "" for no drawer
+        std::string bottomDrawer;  // == "" for no drawer
+        std::string topDrawer;  // == "" for no drawer
         float drawerDropAnim;
         
         bool zoomedToPhoto;
